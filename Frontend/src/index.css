@@ -1,0 +1,28 @@
+@import "tailwindcss";
+
+.Navbarmain{
+    @apply bg-[#0E5AB1] grid grid-cols-3 items-center p-3 gap-80  w-screen; 
+    margin-left: calc(-50vw + 50%);
+    margin-right: calc(-50vw + 50%);
+}
+
+.Navbarbtn{
+    @apply text-3xl text-black cursor-pointer;
+
+    &&:hover{
+        @apply text-white;
+    }
+}
+
+
+.homebtns{
+    @apply flex flex-row gap-25 justify-center items-center mt-50 text-5xl;
+}
+
+.GoogleLogo{
+    @apply w-10 h-10;
+}
+
+.inputbtns{
+    @apply border-black rounded-2xl border-2 h-7 w-80 pl-3 ;
+}
