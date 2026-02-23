@@ -10,6 +10,7 @@ import Signup from './Pages/Signup.jsx'
 import Quiz from './Pages/Quiz.jsx'
 import Singleplayer from './Pages/Singleplayer.jsx'
 import ProtectedRoute from './Components/ProtectedRoute.jsx'
+import History1 from './Components/history1.jsx'
 
 function App() {
   const routes = createBrowserRouter([
@@ -49,6 +50,10 @@ function App() {
         {
           path: '/Quiz/Singleplayer',
           element: <Singleplayer />
+        },
+        {
+          path: '/Quiz/History',
+          element: <History1 />
         }
       ]
       }

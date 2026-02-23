@@ -4,7 +4,7 @@ import Header from '../Components/Header'
 const Layout = () => {
 
   return (
-    <div>
+    <div className='app-shell'>
       <Header />
       <Outlet />
     </div>

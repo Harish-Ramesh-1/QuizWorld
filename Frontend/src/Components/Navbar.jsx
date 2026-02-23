@@ -1,5 +1,5 @@
 import logoutIcon from '../assets/icons/logout.svg'
-import { useNavigate } from 'react-router-dom'; 
+import { NavLink, useNavigate } from 'react-router-dom'; 
 
 const Navbar = () => {
 
@@ -21,15 +21,26 @@ const Navbar = () => {
   return (
     <>
     <div className='Navbarmain'>
-      <div></div>
-    <ul className='flex flex-row justify-center gap-20'>
-        <li className='Navbarbtn'>Singleplayer</li>
-        <li className='Navbarbtn'>Multiplayer</li>
-    </ul>
-    <button className='text-red-500 font-bold flex items-center gap-2 ml-10 cursor-pointer hover:text-red-600' onClick={handleclick}>
-      <img src={logoutIcon} alt="Logout" className='w-6 h-6' />
-      Logout
-    </button>
+      <div className='navbar-inner'>
+        <div className='logo-wrap'>
+          <span className='flame' aria-hidden='true'></span>
+          <span>QuizWorld</span>
+        </div>
+
+        <ul className='flex flex-row justify-center gap-8'>
+            <li>
+              <NavLink to="/Quiz/Singleplayer" className={({ isActive }) => `Navbarbtn ${isActive ? 'active' : ''}`}>Singleplayer</NavLink>
+            </li>
+            <li>
+              <NavLink to="/Quiz/Multiplayer" className={({ isActive }) => `Navbarbtn ${isActive ? 'active' : ''}`}>Multiplayer</NavLink>
+            </li>
+        </ul>
+
+        <button className='btn-danger flex items-center gap-2' onClick={handleclick}>
+          <img src={logoutIcon} alt="Logout" className='w-5 h-5' />
+          Logout
+        </button>
+      </div>
     </div>
     </>
   )

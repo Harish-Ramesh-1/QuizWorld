@@ -20,7 +20,15 @@ const ProtectedRoute = () => {
       .finally(() => setLoading(false));
   }, []);
 
-  if (loading) return <p>Checking authentication...</p>;
+  if (loading) {
+    return (
+      <main className="page-wrap">
+        <div className="premium-card p-6 text-center">
+          <p className="timer">Checking authentication...</p>
+        </div>
+      </main>
+    );
+  }
 
   if (!authorized) {
     return <Navigate to="/Login" replace />;

@@ -3,7 +3,7 @@ import { Outlet } from 'react-router-dom'
 const Layout1 = () => {
 
   return (
-    <div>
+    <div className='app-shell'>
       <Outlet />
     </div>
   )

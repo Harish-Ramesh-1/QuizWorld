@@ -2,18 +2,18 @@
 import { NavLink } from 'react-router-dom'
 
 const Home = () => {
- 
-
   return (
-    <>
-      <h1 className='text-4xl font-bold text-center'>Welcome to QuizWorld</h1>
+    <main className='page-wrap flex justify-center items-center'>
+      <section className='premium-card w-full max-w-3xl p-10 text-center'>
+        <h1 className='text-4xl font-bold card-title'>Welcome to QuizWorld</h1>
+        <p className='text-secondary mt-3'>Black for authority, gold for action. Step in and play your way.</p>
 
-      <div className='homebtns'>
-        <button className='bg-green-400 h-20 w-36 text-center cursor-pointer'><NavLink to="/Login">Login</NavLink></button>
-        <button className='bg-blue-400 h-20 w-44 text-center cursor-pointer'><NavLink to="/Signup">Signup</NavLink></button>
-      </div>
-
-    </>
+        <div className='homebtns'>
+          <NavLink to="/Login" className='btn-primary min-w-32'>Login</NavLink>
+          <NavLink to="/Signup" className='btn-secondary min-w-32'>Signup</NavLink>
+        </div>
+      </section>
+    </main>
   )
 }
 
