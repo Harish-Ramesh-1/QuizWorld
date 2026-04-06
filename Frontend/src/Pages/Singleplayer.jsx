@@ -21,11 +21,14 @@ function Quiz() {
   const [rounds, setRounds] = useState(1);
 
   const [question, setQuestion] = useState(null);
-  const [score, setScore] = useState(null);
+  const [finalScore, setFinalScore] = useState(null);
   const [started, setStarted] = useState(false);
   const [selectedOption, setSelectedOption] = useState(null);
   const [errorMessage, setErrorMessage] = useState("");
   const [noticeMessage, setNoticeMessage] = useState("");
+  const [evaluationPhase, setEvaluationPhase] = useState(false);
+  const [isAdvancing, setIsAdvancing] = useState(false);
+  const [answerResult, setAnswerResult] = useState(null);
   const [quizMeta, setQuizMeta] = useState({
     gameId: "",
     topic: "",
@@ -64,6 +67,9 @@ function Quiz() {
       setStarted(true);
       setQuestion(data);
       setSelectedOption(null);
+      setEvaluationPhase(false);
+      setIsAdvancing(false);
+      setAnswerResult(null);
       setErrorMessage("");
       setNoticeMessage("");
       setQuizMeta({
@@ -78,8 +84,14 @@ function Quiz() {
       setQuestion(prev => (prev ? { ...prev, timeLeft: seconds } : prev));
     });
 
+    socket.on("answerEvaluation", (data) => {
+      setEvaluationPhase(true);
+      setAnswerResult(data);
+    });
+
     socket.on("quizFinished", (data) => {
-      setScore(data.score);
+      setIsAdvancing(false);
+      setFinalScore(data.score);
       setStarted(false);
       setQuestion(null);
       setQuizMeta({
@@ -109,6 +121,7 @@ function Quiz() {
     return () => {
       socket.off("newQuestion");
       socket.off("timerUpdate");
+      socket.off("answerEvaluation");
       socket.off("quizFinished");
       socket.off("errorMessage");
       socket.off("quizAdjusted");
@@ -136,11 +149,20 @@ function Quiz() {
   };
 
   const submitAnswer = () => {
+    if (!selectedOption || !timeLeft || evaluationPhase || isAdvancing) {
+      return;
+    }
+
+    setIsAdvancing(true);
     socket.emit("submitAnswer", { userId });
+
+    setTimeout(() => {
+      socket.emit("nextQuestion", { userId });
+    }, 1000);
   };
 
   const resetToStart = () => {
-    setScore(null);
+    setFinalScore(null);
     setStarted(false);
     setQuestion(null);
     setSelectedOption(null);
@@ -154,11 +176,8 @@ function Quiz() {
   const timerClass = timeLeft <= 5 ? "timer timer-critical" : timeLeft <= 10 ? "timer timer-low" : "timer";
   const progressPercent = Math.max(0, Math.min(100, (timeLeft / 30) * 100));
   const progressClass = timeLeft <= 10 ? "progress-fill low" : "progress-fill";
-  const currentIndex = question?.questionIndex ?? 0;
-  const totalQuestions = question?.totalQuestions || (question?.totalRounds ? question.totalRounds * 5 : 0);
-  const isLastQuestion = totalQuestions ? currentIndex + 1 >= totalQuestions : false;
 
-  if (score !== null) {
+  if (finalScore !== null) {
     return (
       <main className="page-wrap singleplayer-shell">
         <section className="premium-card singleplayer-card p-8 text-center">
@@ -170,7 +189,7 @@ function Quiz() {
           <p className="text-secondary mt-2">You have completed the round.</p>
           <div className="score-ring mt-6">
             <p className="text-sm text-secondary">Final Score</p>
-            <p className="text-4xl font-semibold card-title mt-2">{score}</p>
+            <p className="text-4xl font-semibold card-title mt-2">{finalScore}</p>
           </div>
           <div className="mt-6 grid gap-2 text-sm text-secondary">
             {quizMeta.gameId ? <p>Game ID: {quizMeta.gameId}</p> : null}
@@ -179,7 +198,7 @@ function Quiz() {
             {quizMeta.totalQuestions ? <p>Total Questions: {quizMeta.totalQuestions}</p> : null}
           </div>
           <div className="action-row justify-center mt-6">
-            <button className="btn-primary btn-hero" onClick={() => setScore(null)}>Restart</button>
+            <button className="btn-primary btn-hero" onClick={() => setFinalScore(null)}>Restart</button>
             <button className="btn-secondary" onClick={resetToStart}>Back to Singleplayer</button>
           </div>
         </section>
@@ -282,20 +301,37 @@ function Quiz() {
         </div>
 
         <div className="option-grid">
-          {question.options.map((opt, i) => (
-            <button
-              key={i}
-              className={`answer-option option-button ${selectedOption === opt ? "selected" : ""}`}
-              onClick={() => selectOption(opt)}
-            >
-              {opt}
-            </button>
-          ))}
+          {question.options.map((opt, i) => {
+            let optionClass = "answer-option option-button";
+            if (evaluationPhase && answerResult) {
+              if (opt === answerResult.correctAnswer) {
+                optionClass += " correct";
+              } else if (opt === selectedOption && !answerResult.isCorrect) {
+                optionClass += " wrong";
+              }
+            } else if (selectedOption === opt) {
+              optionClass += " selected";
+            }
+            return (
+              <button
+                key={i}
+                className={optionClass}
+                onClick={() => !evaluationPhase && selectOption(opt)}
+                disabled={evaluationPhase}
+              >
+                {opt}
+              </button>
+            );
+          })}
         </div>
 
         <div className="action-row mt-6">
-          <button className="btn-primary btn-hero" onClick={submitAnswer}>
-            {isLastQuestion ? "Submit" : "Next"}
+          <button 
+            className="btn-primary btn-hero" 
+            onClick={submitAnswer}
+              disabled={!selectedOption || !timeLeft || evaluationPhase || isAdvancing}
+          >
+            Next
           </button>
         </div>
       </section>

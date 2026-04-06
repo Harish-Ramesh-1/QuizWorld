@@ -7,7 +7,7 @@ const socketHandler = (io) => {
 
   io.on("connection", (socket) => {
 
-    // START QUIZ
+    // START QUIZ (Singleplayer)
     socket.on("startQuiz", async ({ userId, topic, rounds }) => {
       try {
         const normalizedTopic = String(topic || "").toLowerCase().trim();
@@ -116,6 +116,10 @@ const socketHandler = (io) => {
       await submitCurrent(socket, userId);
     });
 
+    socket.on("nextQuestion", async ({ userId }) => {
+      await moveToNextQuestion(socket, userId);
+    });
+
   });
 
   async function sendQuestion(socket, userId) {
@@ -179,10 +183,41 @@ const socketHandler = (io) => {
     const session = JSON.parse(data);
     const question = session.questions[session.currentIndex];
 
-    if (session.selectedOption === question.answer) {
+    const isCorrect = session.selectedOption === question.answer;
+    if (isCorrect) {
       session.score++;
     }
 
+    // Stop timer
+    const existingTimer = timerByUser.get(userId);
+    if (existingTimer) {
+      clearInterval(existingTimer);
+      timerByUser.delete(userId);
+    }
+
+    // Send answer evaluation
+    socket.emit("answerEvaluation", {
+      isCorrect,
+      correctAnswer: question.answer,
+      selectedAnswer: session.selectedOption,
+      score: session.score,
+      currentIndex: session.currentIndex,
+      totalQuestions: session.questions.length
+    });
+
+    // Save session without incrementing index yet
+    await redisClient.set(
+      `quiz:${userId}`,
+      JSON.stringify(session),
+      { EX: 1800 }
+    );
+  }
+
+  async function moveToNextQuestion(socket, userId) {
+    const data = await redisClient.get(`quiz:${userId}`);
+    if (!data) return;
+
+    const session = JSON.parse(data);
     session.currentIndex++;
 
     if (session.currentIndex >= session.questions.length) {
@@ -197,11 +232,6 @@ const socketHandler = (io) => {
       });
 
       await redisClient.del(`quiz:${userId}`);
-      const existingTimer = timerByUser.get(userId);
-      if (existingTimer) {
-        clearInterval(existingTimer);
-        timerByUser.delete(userId);
-      }
       return;
     }
 

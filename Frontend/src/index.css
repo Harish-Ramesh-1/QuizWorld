@@ -15,6 +15,8 @@
     --placeholder: #6F6F78;
     --danger: #5C0A1D;
     --danger-hover: #7A0F2B;
+    --success: #16A34A;
+    --success-bg: rgba(22, 163, 74, 0.18);
 }
 
 * {
@@ -247,13 +249,15 @@ body {
 }
 
 .answer-option.correct {
-    background: rgba(226, 88, 34, 0.15);
-    border-color: var(--ember);
+    background: var(--success-bg);
+    border-color: var(--success);
+    color: #D1FAE5;
 }
 
 .answer-option.wrong {
-    background: rgba(92, 10, 29, 0.2);
+    background: rgba(92, 10, 29, 0.28);
     border-color: var(--danger);
+    color: #FECACA;
 }
 
 .leaderboard {

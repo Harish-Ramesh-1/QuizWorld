@@ -1,5 +1,8 @@
 import { useState } from 'react'
 import { NavLink, useNavigate } from 'react-router-dom'
+
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:3000";
+
 const Signup = () => {
   const navigate = useNavigate();
   const [form,setForm] = useState({
@@ -14,24 +17,34 @@ const Signup = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    try {
+      const res = await fetch(`${API_BASE_URL}/auth/signup`,{
+        method: "POST",
+        headers: {"content-type":"application/json"},
+        credentials: "include",
+        body: JSON.stringify(form)
+      })
 
-    const res = await fetch("http://localhost:3000/auth/signup",{
-      method: "POST",
-      headers: {"content-type":"application/json"},
-      credentials: "include",
-      body: JSON.stringify(form)
-    })
-    
-    setForm({
-      username: "",
-      email: "",
-      password: ""
-    })
+      let responseData = null;
+      try {
+        responseData = await res.json();
+      } catch {
+        responseData = null;
+      }
 
-    await res.json();
+      setForm({
+        username: "",
+        email: "",
+        password: ""
+      })
 
-    if(res.ok){
-      navigate("/Quiz");
+      if(res.ok){
+        navigate("/Quiz/");
+      } else {
+        alert(responseData?.error || responseData?.message || "Signup failed");
+      }
+    } catch {
+      alert("Unable to connect to server. Please make sure backend is running and CORS is configured.");
     }
 
 

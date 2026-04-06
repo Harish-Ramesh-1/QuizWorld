@@ -1,12 +1,29 @@
 import express from 'express'
 import { signup , login } from '../Controllers/authController.js';
 import auth from '../Middlewares/authMiddleware.js';
+import User from '../Models/UserModel.js';
 const router = express.Router();
 
 router.post('/signup',signup);
 router.post('/login',login);
-router.get('/me',auth,(req,res) => {
-    res.json({message: "You are authenticated"})
+router.get('/me',auth, async (req,res) => {
+  try {
+    const user = await User.findById(req.user.id).select('username email');
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    res.json({
+      message: "You are authenticated",
+      user: {
+        id: user._id,
+        username: user.username,
+        email: user.email
+      }
+    })
+  } catch {
+    res.status(500).json({ message: 'Failed to fetch user profile' });
+  }
 })
 router.get('/logout',(req,res) => {
     const isProd = process.env.NODE_ENV === "production";

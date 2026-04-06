@@ -5,7 +5,24 @@ import jwt from "jsonwebtoken"
 export const signup = async (req,res) => {
     try{
         const user = await User.create(req.body);
-        res.status(201).json({message: "User created", user})
+        
+        // Create JWT token and set cookie after successful signup
+        const token = jwt.sign(
+            {id: user._id},
+            process.env.JWT_SECRET,
+            {expiresIn:"1d"}
+        );
+
+        const isProd = process.env.NODE_ENV === "production";
+        res.cookie("access_token",token,{
+            httpOnly: true,
+            path: "/",
+            sameSite: isProd ? "none" : "lax",
+            secure: isProd,
+            maxAge: 24 * 60 * 60 * 1000 
+        });
+        
+        res.status(201).json({message: "User created and logged in", user: {id: user._id, username: user.username, email: user.email}});
     }catch(err){
         res.status(400).json({error: err.message });
     }

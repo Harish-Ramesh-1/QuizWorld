@@ -11,6 +11,7 @@ import Quiz from './Pages/Quiz.jsx'
 import Singleplayer from './Pages/Singleplayer.jsx'
 import ProtectedRoute from './Components/ProtectedRoute.jsx'
 import History1 from './Components/history1.jsx'
+import Mainquiz from './Pages/Mainquiz.jsx'
 
 function App() {
   const routes = createBrowserRouter([
@@ -54,6 +55,10 @@ function App() {
         {
           path: '/Quiz/History',
           element: <History1 />
+        },
+        {
+          path: '/Quiz/Mainquiz',
+          element: <Mainquiz />
         }
       ]
       }

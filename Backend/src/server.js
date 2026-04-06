@@ -6,6 +6,7 @@ import connectDB from "./Config/db.js";
 import { Server } from "socket.io";
 import { createServer } from "http";
 import  SocketHandler  from './Socket/socketHandler.js'
+import  RoomHandler  from './Socket/roomHandler.js'
 import redisClient from './Config/redisdb.js';
 
 
@@ -41,13 +42,14 @@ const io = new Server(httpServer, {
 });
 
 
-SocketHandler(io);
-
-
 app.use(cors({
     origin: "http://localhost:5173",
     credentials: true
 }))
+
+
+SocketHandler(io);  // Singleplayer quiz handler
+RoomHandler(io);    // Multiplayer room handler
 
 
 startServer();
